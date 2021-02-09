@@ -6,11 +6,49 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct ContentView: View {
+    
+    @State var batteryState: String = "Retrieving..."
+    
     var body: some View {
-        Text("Hello, world!")
-            .padding()
+        NavigationView {
+            Text("Status: \(batteryState)")
+                .padding()
+                .navigationBarTitle("Battery Status")
+                .navigationBarItems(trailing:
+                    Button(action: {
+                        checkChargingState()
+                    }) {
+                        Image(systemName: "arrow.counterclockwise")
+                    }
+                )
+        }.onAppear(perform: {
+            checkChargingState()
+        })
+    }
+    
+    private func checkChargingState() {
+        // Allows the app to be notified of changes to the battery state
+        UIDevice.current.isBatteryMonitoringEnabled = true
+        
+        // Retrieves the battery percentage
+        let deviceBatteryLevel = Int(UIDevice.current.batteryLevel * 100)
+        
+        switch UIDevice.current.batteryState {
+            case .unknown:
+              batteryState = "Unknown"
+            case .charging:
+              batteryState = "Charging at \(deviceBatteryLevel)%"
+            case .full:
+              batteryState = "Full at \(deviceBatteryLevel)%"
+            case .unplugged:
+              batteryState = "Unplugged at \(deviceBatteryLevel)%"
+        @unknown default:
+            batteryState = "Error."
+            fatalError()
+        }
     }
 }
 
